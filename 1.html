@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>re Vue 1</title>
+  <style>
+    .text-red {
+      color: red;
+    }
+
+    .bg-dark {
+      background: black;
+    }
+
+    .opacity {
+      opacity: 0.5;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <!-- 模板語法和標籤的 v-text 可以將資料以文字方式輸出 -->
+    <h1>{{ text }}</h1>
+    <h1>{{ text === '你好' ? 'o' : 'x' }}</h1>
+    <h1>{{ html }}</h1>
+    <!-- v-html 屬性可以將資料以 HTML 輸出 -->
+    <h1 v-html="html"></h1>
+    <!-- 標籤內判斷式，符合條件才出現 -->
+    <h1 v-if="number > 10">大於 10</h1>
+    <h1 v-else-if="number === 10">等於10</h1>
+    <h1 v-else="number < 10"> 小於10</h1>
+    <ul>
+      <!-- 標籤內迴圈 -->
+      <li v-for="(fruit, idx) in fruits">第 {{ idx + 1 }} 個水果是 {{ fruit }}</li>
+    </ul>
+    <!-- 綁定屬性，使用 v-bind:屬性 或是 :屬性 -->
+    <!-- v-bind 裡屬於 js 範圍，如果有文字要加引號 -->
+    <img v-bind:src="imgsrc" width="100">
+    <img :src="imgsrc" width="100">
+    <!-- 綁定 class，裡面要放 json，key 是 class 名，value 是 true 或 false -->
+    <h1 :class="textClass">ken</h1>
+    <!-- 綁定 style，裡面要放 json，key 是樣式名，value 是 data -->
+    <h1 :style="textStyle">lee</h1>
+    <!-- v-model 綁定輸入欄位的 value -->
+    <form action="">
+      <input type="text" v-model="form.account"> {{ form.account }}
+      <br>
+      <input type="password" v-model="form.password" autoComplete=“true”> {{ form.password}}
+      <br>
+    </form>
+    <!-- checkbox 和 radio 以 v-model 分組， v-model 是使用者選的值，value 是欄位的值-->
+    <input type="radio" v-model="form.job" v-for="jobOption in jobOptions" :value="jobOption"> {{ form.job }}
+    <br>
+    <input type="radio" :value="true" v-model="form.code">
+    <input type="radio" :value="false" v-model="form.code">
+    {{ form.code}}
+    <br>
+    <select v-model="form.class">
+      <option v-for="classOption in classOptions" :value="classOption">{{ classOption }}</option>
+    </select>
+    {{ form.class }}
+    <br>
+    <h1>{{ number }}</h1>
+    <br>
+    <!-- 事件，使用 v-on:事件 或是 @事件 -->
+    <!-- 事件有 .prevent .stop 修飾符可以用 -->
+    <!-- 鍵盤事件則有按鍵修飾符，如 @keydown.enter 和 @keydown.13 -->
+    <input type="button" value="+" v-on:click="number++">
+    <input type="button" value="-" @click="number--">
+    <br>
+    <input type="button" value="換圖片" @click="changeSrc">
+    <br>
+    <input type="button" value="換圖片2"
+      @click="changeSrcTo('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRr-DkJiqGxtGlleZ1KHWB_xcxHGzdzBWdclw&usqp=CAU')">
+    <br>
+    <input type="button" value="換圖片3"
+      @click="changSrcToWithEvent('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRr-DkJiqGxtGlleZ1KHWB_xcxHGzdzBWdclw&usqp=CAU', $event)">
+    <br>
+    <a href="https://google.com" @click.prevent="notify('no')">Google</a>
+  </div>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script>
+    const { ref, reactive } = Vue
+    Vue.createApp({
+      setup () {
+        const text = ref('你好')
+        const html = ref('<a href="https://fb.com">FB<a>')
+        const number = ref(10)
+        const fruits = reactive(['西瓜', '香蕉', '芭樂', '哈密瓜'])
+        const imgsrc = ref('https://avatars.githubusercontent.com/u/103400040?v=4')
+        // 綁定 class，裡面要放 json，key 是 class 名，value 是 true 或 false 
+        const textClass = reactive({
+          // 物件有特殊符號，才需要用引號 ""
+          'text-red': true,
+          opacity: true
+        })
+        const textStyle = reactive({
+          color: 'blue',
+          background: 'black'
+        })
+        const form = reactive({
+          account: '',
+          password: '',
+          job: '',
+          code: null,
+          class: ''
+        })
+        const jobOptions = reactive([
+          '學生',
+          '工程師',
+          '無業'
+        ])
+        const classOptions = reactive([
+          '前端',
+          '後端'
+        ])
+        const changeSrc = (event) => {
+          // ref 修改值要加 .value
+          // reactive 呼叫不用加 .value
+          // 要用 event 就寫出來，不寫也沒差
+          console.log(event)
+          imgsrc.value = 'https://miro.medium.com/max/1200/1*MbCyr-5f1ZcamARuAVoKrg.png'
+        }
+        const changeSrcTo = (value) => {
+          imgsrc.value = value
+        }
+        const changSrcToWithEvent = (value, event) => {
+          imgsrc.value = value
+          console.log(event)
+        }
+        const notify = (text) => {
+          alert(text)
+        }
+        return {
+          text,
+          html,
+          number,
+          fruits,
+          imgsrc,
+          textClass,
+          textStyle,
+          form,
+          jobOptions,
+          classOptions,
+          changeSrc,
+          changeSrcTo,
+          changSrcToWithEvent,
+          notify
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+
+</html>

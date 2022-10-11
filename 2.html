@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div id="app">
+    <input type="text" v-model="input" @keydown.enter="additem" :style="inputStyle">
+    <input type="button" value="新增" @click="additem">
+    <hr>
+    <input type="text" placeholder="輸入搜尋文字" v-model="search">
+    <input type="radio" v-model="displaydone" :value="true"> 已完成
+    <input type="radio" v-model="displaydone" :value="false"> 未完成
+    <input type="radio" v-model="displaydone" :value="null"> 全部
+    <ul>
+      <li v-for="(item, idx) in filetereditems" :key="item.id">
+        <input type="checkbox" v-model="item.done">
+        <del v-if="item.done">{{ item.text }}</del>
+        <span v-else>{{ item.text }}</span>
+        <input type="button" value="x" @click="delitem(item.id)">
+      </li>
+    </ul>
+    <!-- <canvas width="500" height="500" ref="canvas"></canvas> -->
+  </div>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script>
+    const { reactive, ref, computed, watch, onMounted, onUnmounted, onUpdated } = Vue
+    const vm = Vue.createApp({
+      setup () {
+        const items = reactive([])
+        const input = ref('')
+        const search = ref('')
+        const displaydone = ref(null)
+        const canvas = ref(null)
+        let id = 0
+        // 讀取 localStorage
+        // localStorage 把資料存在瀏覽器，只能存文字，有10mb的限制，給他訂個儲存名字叫 vue-todo ， getItem 就要用 vue-todo
+        // JSON.parse 轉陣列
+        const local = JSON.parse(localStorage.getItem('vue-todo'))
+        if (local) {
+          // ...運算子 1234 => 1,2,3,4
+          items.push(...local)
+          id = local[local.length - 1].id + 1
+        }
+        const additem = () => {
+          if (input.value.length <= 2) return
+          items.push({
+            text: input.value,
+            done: false,
+            id: id++
+          })
+          input.value = ''
+        }
+        // computed 是 function 處理後產生的 data，值會在相依變數修改時動態更新
+        // computed 記得要 return
+        const inputStyle = computed(() => {
+          if (input.value.length === 0) return { border: '' }
+          else if (input.value.length <= 2) return { border: '5px solid red' }
+          else return { border: '5px solid green' }
+        })
+
+        const filetereditems = computed(() => {
+          // 如果後面可以直接 return 可以簡寫不用 {return ...} 
+          return items.filter(item => {
+            const inc = item.text.includes(search.value)
+            if (displaydone.value === null) return inc
+            else if (displaydone.value) return inc && item.done
+            else return inc && !item.done
+
+          })
+        })
+
+        const delitem = (id) => {
+          const idx = items.findIndex(item => item.id === id)
+          items.splice(idx, 1)
+        }
+
+        // 偵測
+        // 偵測 reactive 全部屬性變更，無法取得 oldValue
+        // 偵測 reactive 內一個屬性的變更，可以取得 oldValue
+        // 偵測 reactive 內多個屬性的變更，可以取得 oldValue
+        // 偵測 reactive 內屬性的變更，若屬性是 Object 的話需要 deep: true
+        watch(items, (newValue) => {
+          localStorage.setItem('vue-todo', JSON.stringify(items))
+        })
+
+        // 初始 vue 專案的時候，執行 setup function 時機
+        console.log('Created');
+
+        // 執行完 setup 完
+        // 操作 DOM 要在 onMounted 以後
+        onMounted(() => {
+          console.log('onMounted')
+          const ctx = canvas.value.getContext('2d')
+          ctx.fillStyle = 'black'
+          ctx.fillRect(0, 0, 100, 100)
+          ctx.fillStyle = 'blue'
+          ctx.fillRect(300, 300, 200, 200)
+        })
+
+        // 元件更新跑 onUpdated
+        onUpdated(() => {
+          console.log('onUpdated');
+        })
+
+        // 解除掛載
+        onUnmounted(() => {
+          console.log('onUnmounted');
+        })
+        return {
+          items,
+          input,
+          additem,
+          inputStyle,
+          delitem,
+          search,
+          filetereditems,
+          displaydone,
+          canvas
+        }
+      }
+    })
+
+    vm.mount('#app')
+
+    setTimeout(() => {
+      // vm.unmount()
+    }, 5000)
+  </script>
+</body>
+
+</html>
