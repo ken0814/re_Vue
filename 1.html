@@ -81,6 +81,7 @@
       @click="changSrcToWithEvent('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRr-DkJiqGxtGlleZ1KHWB_xcxHGzdzBWdclw&usqp=CAU', $event)">
     <br>
     <a href="https://google.com" @click.prevent="notify('no')">Google</a>
+    <button @click="change">+++</button>
   </div>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script>
@@ -93,15 +94,21 @@
         const fruits = reactive(['西瓜', '香蕉', '芭樂', '哈密瓜'])
         const imgsrc = ref('https://avatars.githubusercontent.com/u/103400040?v=4')
         // 綁定 class，裡面要放 json，key 是 class 名，value 是 true 或 false 
+        const textStyle = reactive({
+          color: 'blue',
+          background: 'black'
+        })
+
         const textClass = reactive({
           // 物件有特殊符號，才需要用引號 ""
           'text-red': true,
           opacity: true
         })
-        const textStyle = reactive({
-          color: 'blue',
-          background: 'black'
-        })
+
+        const change = () => {
+          textClass.opacity = false
+        }
+
         const form = reactive({
           account: '',
           password: '',
@@ -149,7 +156,8 @@
           changeSrc,
           changeSrcTo,
           changSrcToWithEvent,
-          notify
+          notify,
+          change
         }
       }
     }).mount('#app')
